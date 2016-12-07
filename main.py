@@ -3,21 +3,35 @@ import csv
 import requests
 from bs4 import BeautifulSoup
 
+power_of_ten_fields = {
+    0: 'event',
+    1: 'time',
+    5: 'position',
+    9: 'venue',
+    10: 'meeting',
+    11: 'date'
+    }
+
 class RaceResult(object):
-    fields = ['event', 'time', 'position', 'venue', 'meeting', 'date']
+    fields = power_of_ten_fields
     
-    def __init__(self, **kwargs):
-        assert all(f in kwargs for f in self.fields)
-        assert all(f in self.fields for f in kwargs)
-        for f in self.fields:
-            setattr(self, f, kwargs[f])
+    field_names = [power_of_ten_fields.get(i, "") for i in range(12)]
+    
+    def __init__(self, values=None):
+        assert values is not None
+        self.values = values
+    
+    @property
+    def event(self):
+        assert self.fields[0] == 'event'
+        return self.values[0]
     
     def show(self):
-        for f in self.fields:
-            print("{}: {}".format(f.upper(), getattr(self, f)))
+        for index, field in self.fields.items():
+            print("{}: {}".format(field, self.values[index]))
     
     def csv_line(self, csvwriter):
-        csvwriter.writerow([getattr(self,f) for f in self.fields])
+        csvwriter.writerow(self.values)
 
 
 class Athlete(object):
@@ -58,16 +72,8 @@ class Athlete(object):
     
         def create_result(row):
             cells = row.find_all('td')
-            if len(cells) < 12:
-                return None
-            return RaceResult(
-                event=cells[0].get_text(),
-                time=cells[1].get_text(),
-                position=cells[5].get_text(),
-                venue=cells[9].get_text(),
-                meeting=cells[10].get_text(),
-                date=cells[11].get_text()
-                )
+            values = [c.get_text() for c in cells]
+            return RaceResult(values=values)
         results = []
         for perf_table in perf_tables:
             these_results = (create_result(r) for r in perf_table.find_all('tr'))
@@ -88,7 +94,7 @@ class Athlete(object):
                 quoting=csv.QUOTE_MINIMAL
                 )
             csvfile.write("#")
-            csvwriter.writerow(RaceResult.fields)
+            csvwriter.writerow(RaceResult.field_names)
             for r in self.race_results:
                 r.csv_line(csvwriter)
 
@@ -96,7 +102,9 @@ if __name__ == "__main__":
     athletes = [
         Athlete("Christopher", "O'Brien"),
         Athlete("Steven", "O'Brien"),
-        Athlete("Moray", "Anderson")
+        Athlete("Moray", "Anderson"),
+        Athlete("Craig", "Knowles"),
+        Athlete("Tom", "Hunt")
     ]
     for athlete in athletes:
         athlete.get_profile_links()
