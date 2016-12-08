@@ -14,22 +14,22 @@ power_of_ten_fields = {
 
 class RaceResult(object):
     fields = power_of_ten_fields
-    
+
     field_names = [power_of_ten_fields.get(i, "") for i in range(12)]
-    
+
     def __init__(self, values=None):
         assert values is not None
         self.values = values
-    
+
     @property
     def event(self):
         assert self.fields[0] == 'event'
         return self.values[0]
-    
+
     def show(self):
         for index, field in self.fields.items():
             print("{}: {}".format(field, self.values[index]))
-    
+
     def csv_line(self, csvwriter):
         csvwriter.writerow(self.values)
 
@@ -48,7 +48,7 @@ class Athlete(object):
                   'firstname': self.first_name,
                   'club': "Corstorphine" }
         response = requests.post(url, params=params)
-        
+
         soup = BeautifulSoup(response.text, 'html.parser')
         results_table = soup.find(id="cphBody_pnlResults")
         links = results_table.find_all('a')
@@ -69,7 +69,7 @@ class Athlete(object):
             except (ValueError, AttributeError, IndexError):
                 return False
         perf_tables = [t for t in tables if results_table(t)]
-    
+
         def create_result(row):
             cells = row.find_all('td')
             if len(cells) < 12:
@@ -85,14 +85,14 @@ class Athlete(object):
     def show_results(self):
         for r in self.race_results:
             r.show()
-    
+
     def save_results_as_csv(self):
         filename = "results/" + self.first_name + '_' + self.last_name + ".csv"
         with open(filename, 'w', newline='') as csvfile:
             csvwriter = csv.writer(csvfile,
-                
-                delimiter=',', 
-                quotechar='|', 
+
+                delimiter=',',
+                quotechar='|',
                 quoting=csv.QUOTE_MINIMAL
                 )
             csvfile.write("#")
