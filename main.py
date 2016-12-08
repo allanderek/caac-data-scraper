@@ -9,13 +9,14 @@ power_of_ten_fields = {
     5: 'position',
     9: 'venue',
     10: 'meeting',
-    11: 'date'
+    11: 'date',
+    12: 'venue-link'
     }
 
 class RaceResult(object):
     fields = power_of_ten_fields
 
-    field_names = [power_of_ten_fields.get(i, "") for i in range(12)]
+    field_names = [power_of_ten_fields.get(i, "") for i in range(13)]
 
     def __init__(self, values=None):
         assert values is not None
@@ -75,6 +76,16 @@ class Athlete(object):
             if len(cells) < 12:
                 return None
             values = [c.get_text() for c in cells]
+            for index, cell in enumerate(cells):
+                if power_of_ten_fields.get(index, "") == 'venue':
+                    if cell.a:
+                        venue_link = cell.a.get('href')
+                    else:
+                        venue_link = 'no venue link'
+                    break
+            else:
+                venue_link = "no venue link"
+            values.append(venue_link)
             return RaceResult(values=values)
         results = []
         for perf_table in perf_tables:
@@ -95,6 +106,8 @@ class Athlete(object):
                 quotechar='|',
                 quoting=csv.QUOTE_MINIMAL
                 )
+            csvfile.write("# Profile link: {}\n".format(self.power_of_ten_link))
+            csvfile.write("# Profile link: {}\n".format(self.runbritain_link))
             csvfile.write("#")
             csvwriter.writerow(RaceResult.field_names)
             for r in self.race_results:
