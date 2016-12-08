@@ -72,6 +72,8 @@ class Athlete(object):
     
         def create_result(row):
             cells = row.find_all('td')
+            if len(cells) < 12:
+                return None
             values = [c.get_text() for c in cells]
             return RaceResult(values=values)
         results = []
