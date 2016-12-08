@@ -85,7 +85,7 @@ class Athlete(object):
             r.show()
     
     def save_results_as_csv(self):
-        filename = self.first_name + '_' + self.last_name + ".csv"
+        filename = "results/" + self.first_name + '_' + self.last_name + ".csv"
         with open(filename, 'w', newline='') as csvfile:
             csvwriter = csv.writer(csvfile,
                 
