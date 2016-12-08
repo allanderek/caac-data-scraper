@@ -101,7 +101,6 @@ class Athlete(object):
         filename = "results/" + self.first_name + '_' + self.last_name + ".csv"
         with open(filename, 'w', newline='') as csvfile:
             csvwriter = csv.writer(csvfile,
-
                 delimiter=',',
                 quotechar='|',
                 quoting=csv.QUOTE_MINIMAL
