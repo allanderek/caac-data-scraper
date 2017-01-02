@@ -16,6 +16,10 @@ power_of_ten_fields = {
 class RaceResult(object):
     fields = power_of_ten_fields
 
+    # This could all be made a bit simpler if we just accepted that each line
+    # should contain the athlete information, and then not be bothered  by the
+    # fact that we would be outputting that unnecessarily for every line in a
+    # file dedicated to a single athlete.
     field_names = [power_of_ten_fields.get(i, "") for i in range(13)]
     extra_names = ['Athlete', 'Profile Link 1', 'Profile Link 2']
 
@@ -36,6 +40,9 @@ class RaceResult(object):
         csvwriter.writerow(self.values)
 
     def generalise(self, athlete):
+        """Changes the results line from one suitable for a CSV dedicated to a
+        single athlete, to one suitable for a general results file. In other
+        words put the athlete information into the results line."""
         extra_values = [athlete.full_name,
                         athlete.power_of_ten_link,
                         athlete.runbritain_link]
