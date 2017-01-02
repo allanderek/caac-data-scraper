@@ -79,7 +79,11 @@ class Athlete(object):
             for index, cell in enumerate(cells):
                 if power_of_ten_fields.get(index, "") == 'venue':
                     if cell.a:
-                        venue_link = cell.a.get('href')
+                        relative_venue_link = cell.a.get('href')
+                        # We could of course use urllib from the standard library
+                        # to do this, and if it gets anymore complex then we should
+                        # but for now this is simple enough.
+                        venue_link = relative_venue_link.replace('../', 'http://powerof10.info/')
                     else:
                         venue_link = 'no venue link'
                     break
