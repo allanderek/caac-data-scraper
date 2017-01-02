@@ -20,7 +20,7 @@ class RaceResult(object):
     # should contain the athlete information, and then not be bothered  by the
     # fact that we would be outputting that unnecessarily for every line in a
     # file dedicated to a single athlete.
-    field_names = [power_of_ten_fields.get(i, "") for i in range(13)]
+    field_names = [power_of_ten_fields.get(i, "") for i in range(13)] + ['category']
     extra_names = ['Athlete', 'Profile Link 1', 'Profile Link 2']
 
     def __init__(self, values=None):
@@ -90,9 +90,15 @@ class Athlete(object):
                 return False
         perf_tables = [t for t in tables if results_table(t)]
 
+        self.current_category = ''
         def create_result(row):
             cells = row.find_all('td')
             if len(cells) < 12:
+                if cells and cells[0]:
+                    heading_text = cells[0].get_text()
+                    heading_words = heading_text.split(' ')
+                    if len(heading_words) >= 3:
+                        self.current_category = heading_words[1]
                 return None
             values = [c.get_text() for c in cells]
             for index, cell in enumerate(cells):
@@ -109,6 +115,7 @@ class Athlete(object):
             else:
                 venue_link = "no venue link"
             values.append(venue_link)
+            values.append(self.current_category)
             return RaceResult(values=values)
         results = []
         for perf_table in perf_tables:
