@@ -17,6 +17,7 @@ class RaceResult(object):
     fields = power_of_ten_fields
 
     field_names = [power_of_ten_fields.get(i, "") for i in range(13)]
+    extra_names = ['Athlete', 'Profile Link 1', 'Profile Link 2']
 
     def __init__(self, values=None):
         assert values is not None
@@ -24,8 +25,8 @@ class RaceResult(object):
 
     @property
     def event(self):
-        assert self.fields[0] == 'event'
-        return self.values[0]
+        assert 'event' in self.field_names
+        return self.values[self.field_names.index('event')]
 
     def show(self):
         for index, field in self.fields.items():
@@ -33,6 +34,13 @@ class RaceResult(object):
 
     def csv_line(self, csvwriter):
         csvwriter.writerow(self.values)
+
+    def generalise(self, athlete):
+        extra_values = [athlete.full_name,
+                        athlete.power_of_ten_link,
+                        athlete.runbritain_link]
+        self.field_names = self.extra_names + self.field_names
+        self.values = extra_values + self.values
 
 
 class Athlete(object):
@@ -42,6 +50,10 @@ class Athlete(object):
         self.club = "Corstorphine"
         self.power_of_ten_link = None
         self.runbritain_link = None
+
+    @property
+    def full_name(self):
+        return self.first_name + ' ' + self.last_name
 
     def get_profile_links(self):
         url = "http://powerof10.info/athletes/athleteslookup.aspx"
@@ -116,6 +128,11 @@ class Athlete(object):
             for r in self.race_results:
                 r.csv_line(csvwriter)
 
+    def add_to_main_results(self, csvwriter):
+        for r in self.race_results:
+            r.generalise(self)
+            r.csv_line(csvwriter)
+
 if __name__ == "__main__":
     athletes = [
         Athlete("Christopher", "O'Brien"),
@@ -128,3 +145,13 @@ if __name__ == "__main__":
         athlete.get_profile_links()
         athlete.get_race_results()
         athlete.save_results_as_csv()
+    with open('results/all.csv', 'w', newline='') as csvfile:
+            csvwriter = csv.writer(csvfile,
+                delimiter=',',
+                quotechar='|',
+                quoting=csv.QUOTE_MINIMAL
+                )
+            csvfile.write("#")
+            csvwriter.writerow(RaceResult.extra_names + RaceResult.field_names)
+            for athlete in athletes:
+                athlete.add_to_main_results(csvwriter)

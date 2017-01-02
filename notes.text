@@ -3,7 +3,7 @@
 [] The column headers didnt show, not really an issue as I can name them by position on import.
 [] Some of the times are guff but they are so on the source site i.e a 4KXC is 13mins 58s 13:58 but a ZXC is 32:13:00 same dunits different style.
 
-[] It's good to be able to call an individual's results but additionally could all from a list be shown as one for data upload? So for all persons (ids - not sure which you are using) on a list it comes out as
+[x] It's good to be able to call an individual's results but additionally could all from a list be shown as one for data upload? So for all persons (ids - not sure which you are using) on a list it comes out as
 
     Athlete Name / Profile link1 / Profile link2 / event / time / etc
     ..
