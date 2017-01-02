@@ -137,7 +137,7 @@ class Athlete(object):
                 )
             csvfile.write("# Profile link: {}\n".format(self.power_of_ten_link))
             csvfile.write("# Profile link: {}\n".format(self.runbritain_link))
-            csvfile.write("#")
+            # csvfile.write("#")
             csvwriter.writerow(RaceResult.field_names)
             for r in self.race_results:
                 r.csv_line(csvwriter)
@@ -165,7 +165,7 @@ if __name__ == "__main__":
                 quotechar='|',
                 quoting=csv.QUOTE_MINIMAL
                 )
-            csvfile.write("#")
+            # csvfile.write("#")
             csvwriter.writerow(RaceResult.extra_names + RaceResult.field_names)
             for athlete in athletes:
                 athlete.add_to_main_results(csvwriter)
