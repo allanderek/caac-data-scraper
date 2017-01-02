@@ -22,6 +22,7 @@ class RaceResult(object):
     # file dedicated to a single athlete.
     field_names = [power_of_ten_fields.get(i, "") for i in range(13)] + ['category']
     extra_names = ['Athlete', 'Profile Link 1', 'Profile Link 2']
+    general_names = extra_names + field_names
 
     def __init__(self, values=None):
         assert values is not None
@@ -31,6 +32,18 @@ class RaceResult(object):
     def event(self):
         assert 'event' in self.field_names
         return self.values[self.field_names.index('event')]
+
+    @property
+    def html_values(self):
+        def markup(name, value):
+            if name == 'Profile Link 1':
+                return '<a href="{}">Po10 Link</a>'.format(value)
+            elif name == 'Profile Link 2':
+                return '<a href="{}">Run Britain Link</a>'.format(value)
+            elif name == 'venue-link':
+                return '<a href="{}">Venue Link</a>'.format(value)
+            return value
+        return (markup(n, v) for n, v in zip(self.field_names, self.values))
 
     def show(self):
         for index, field in self.fields.items():
@@ -46,7 +59,7 @@ class RaceResult(object):
         extra_values = [athlete.full_name,
                         athlete.power_of_ten_link,
                         athlete.runbritain_link]
-        self.field_names = self.extra_names + self.field_names
+        self.field_names = self.general_names
         self.values = extra_values + self.values
 
 
@@ -147,6 +160,41 @@ class Athlete(object):
             r.generalise(self)
             r.csv_line(csvwriter)
 
+html_template = """
+<!DOCTYPE html>
+<html>
+<head>
+<title>Caac Race Results</title>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/picnicss/6.0.0/picnic.min.css" crossorigin="anonymous">
+ <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+<h1>Download</h1>
+You can download all the results as one csv file <a href="results/all.csv">here</a>.
+
+<h1>Results</h1>
+{}
+</body>
+</html>
+"""
+
+def make_tag(name, contents):
+    return "<{0}>{1}</{0}>".format(name, contents)
+
+def create_table(headers, rows):
+    header_cells = "".join([make_tag('th', h) for h in headers])
+    head_row = make_tag('tr', header_cells)
+    def make_row(row):
+        return make_tag('tr', "".join([make_tag('td', r) for r in row]))
+    body_rows = "".join([make_row(r) for r in rows])
+    return make_tag('table', head_row + body_rows)
+
+def create_html(race_results):
+    results_table_html = create_table(RaceResult.general_names, race_results)
+    html_content = html_template.format(results_table_html)
+    with open('index.html', 'w') as htmlfile:
+        htmlfile.write(html_content)
+
 if __name__ == "__main__":
     athletes = [
         Athlete("Christopher", "O'Brien"),
@@ -166,6 +214,10 @@ if __name__ == "__main__":
                 quoting=csv.QUOTE_MINIMAL
                 )
             # csvfile.write("#")
-            csvwriter.writerow(RaceResult.extra_names + RaceResult.field_names)
+            csvwriter.writerow(RaceResult.general_names)
             for athlete in athletes:
                 athlete.add_to_main_results(csvwriter)
+    race_results = []
+    for athlete in athletes:
+        race_results.extend(r.html_values for r in athlete.race_results)
+    create_html(race_results)
