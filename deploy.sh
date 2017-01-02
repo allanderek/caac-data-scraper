@@ -15,5 +15,5 @@ git add index.html &&
 git add results/all.csv &&
 git commit -m "Latest build and commit to gh-pages" &&
 git push origin gh-pages &&
-git checkout master
+git checkout master &&
 echo "Visit: https://allanderek.github.io/caac-data-scraper/"
